@@ -1,0 +1,109 @@
+// @use "sass:math";
+// @import '../../const.scss';
+
+$icon-root: './icons';
+
+$default-bg: #edf2fc;
+$default-border: #ebeef5;
+$default-font: #909399;
+
+$success-bg: #f0f9eb;
+$success-border: #e1f3d8;
+$success-font: #67C23A;
+
+$warning-bg: #fdf6ec;
+$warning-border: #faecd8;
+$warning-font: #E6A23C;
+
+$error-bg: #fef0f0;
+$error-border: #fde2e2;
+$error-font: #F56C6C;
+
+
+.notice-message {
+    &.notice {
+        position: absolute;
+        box-sizing: border-box;
+        border-radius: 8px;
+        min-width: 200px;
+        padding-left: 20px;
+        padding-right: 8px;
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        border: 1px solid $default-border;
+        background-color: $default-bg;
+        color: $default-font;
+
+        transition: top 0.2s ease-out;
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            background-image: url('#{$icon-root}/default.png');
+            background-repeat: no-repeat;
+            background-size: 21px 21px;
+            background-position: center;
+            margin-right: 8px;
+        }
+
+        .text {
+            font-size: 14px;
+            line-height: 14px;
+        }
+
+        .btn-del {
+            width: 16px;
+            height: 16px;
+            mask-image: url('#{$icon-root}/delete.svg');
+            background-color: $default-font;
+            cursor: pointer;
+            user-select: none;
+            margin-left: 4px;
+        }
+
+        &.success {
+            border: 1px solid $success-border;
+            background-color: $success-bg;
+            color: $success-font;
+
+            .icon {
+                background-image: url('#{$icon-root}/success.png');
+            }
+
+            .btn-del {
+                background-color: $success-font;
+            }
+        }
+
+        &.warning {
+            border: 1px solid $warning-border;
+            background-color: $warning-bg;
+            color: $warning-font;
+
+            .icon {
+                background-image: url('#{$icon-root}/warning.png');
+            }
+
+            .btn-del {
+                background-color: $success-font;
+            }
+        }
+
+        &.error {
+            border: 1px solid $error-border;
+            background-color: $error-bg;
+            color: $error-font;
+
+            .icon {
+                background-image: url('#{$icon-root}/error.png');
+            }
+
+            .btn-del {
+                background-color: $success-font;
+            }
+        }
+    }
+}
