@@ -15,9 +15,9 @@ $warning-bg: #fdf6ec;
 $warning-border: #faecd8;
 $warning-font: #E6A23C;
 
-$error-bg: #fef0f0;
-$error-border: #fde2e2;
-$error-font: #F56C6C;
+$mistake-bg: #fef0f0;
+$mistake-border: #fde2e2;
+$mistake-font: #F56C6C;
 
 
 .notice-message {
@@ -88,21 +88,21 @@ $error-font: #F56C6C;
             }
 
             .btn-del {
-                background-color: $success-font;
+                background-color: $warning-font;
             }
         }
 
         &.error {
-            border: 1px solid $error-border;
-            background-color: $error-bg;
-            color: $error-font;
+            border: 1px solid $mistake-border;
+            background-color: $mistake-bg;
+            color: $mistake-font;
 
             .icon {
                 background-image: url('#{$icon-root}/error.png');
             }
 
             .btn-del {
-                background-color: $success-font;
+                background-color: $mistake-font;
             }
         }
     }

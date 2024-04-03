@@ -23,9 +23,11 @@ $bar0.append($btn03);
 
 const $btn10 = $('<button>随机时间</button>');
 const $btn11 = $('<button>随机高度</button>');
+const $btn12 = $('<button>不自动关闭</button>');
 
 $bar1.append($btn10);
 $bar1.append($btn11);
+$bar1.append($btn12);
 
 // -----------------------------------------------
 
@@ -48,15 +50,35 @@ $btn03.on('click', () => {
 });
 
 $btn10.on('click', () => {
-  const r = Math.round(randomInScope(2, 5));
-  const duration = r * 1000;
-  Notice.pop({ message: `Notice Message show ${r} seconds`, duration });
+  const factor = randomIntInScope(2, 5);
+  const duration = factor * 1000;
+  const type = randomType();
+  Notice.pop({ message: `Notice Message show ${factor} seconds`, type, duration });
 });
 
 $btn11.on('click', () => {
-  const height = Math.round(randomInScope(48, 80));
-  Notice.pop({ message: `Notice Message of ${height}px show`, height });
+  const factor = randomIntInScope(6, 30);
+  const height = factor * 8;
+  const type = randomType();
+  Notice.pop({ message: `Notice Message of ${height}px show`, type, height });
 });
+
+$btn12.on('click', () => {
+  const factor = randomIntInScope(6, 12);
+  const height = factor * 8;
+  const type = randomType();
+  Notice.pop({ message: `Notice Message of ${height}px show`, type, height, duration: 0, closable: true });
+});
+
+function randomType(): 'default' | 'success' | 'warning' | 'error' {
+  const factor = randomIntInScope(0, 3);
+  const arr: Array<'default' | 'success' | 'warning' | 'error'> = ['default', 'success', 'warning', 'error'];
+  return arr[factor];
+}
+
+function randomIntInScope(min: number, max: number) {
+  return Math.round(randomInScope(min, max));
+}
 
 function randomInScope(min: number, max: number) {
   return Math.random() * (max - min) + min;
