@@ -25,7 +25,7 @@ function animate() {
     group.update();
 }
 
-class NoticeUnit {
+class MessageUnit {
     /** 消息单元中需要显示的内容 */
     private content: string;
     /** 消息单元的类型，包括：默认，成功，警告，错误 */
@@ -45,8 +45,8 @@ class NoticeUnit {
     private closable: boolean;
     /** 自定义类名 */
     private customClass: string[] = [];
-    /** 关闭时的回调函数, 参数为被关闭的 NoticeUnit 实例 */
-    private _onClose?: (noticeUnit: NoticeUnit) => void;
+    /** 关闭时的回调函数, 参数为被关闭的 MessageUnit 实例 */
+    private _onClose?: (messageUnit: MessageUnit) => void;
 
     /** 消息主体框的高度 */
     private _height: number;
@@ -82,7 +82,7 @@ class NoticeUnit {
         closable: boolean,
         height: number,
         customClass?: string | string[],
-        onClose?: (noticeUnit: NoticeUnit) => void,
+        onClose?: (messageUnit: MessageUnit) => void,
     }) {
         const {
             content,
@@ -223,7 +223,7 @@ export class Notice {
     /** 消息单元滑动消失的时间 */
     private static readonly slideTime: number = 300;
     /** 存放提示单元集合 */
-    private static readonly units: NoticeUnit[] = [];
+    private static readonly units: MessageUnit[] = [];
     /** 提示集的容器 */
     private static container: HTMLElement = document.body;
 
@@ -241,7 +241,7 @@ export class Notice {
      * @param params.closable 消息的关闭按钮是否显示。默认为 false
      * @param params.customClass 消息的自定义类名
      */
-    public static pop(params: {
+    public static message(params: {
         message: string,
         type?: 'default' | 'success' | 'warning' | 'error',
         duration?: number,
@@ -250,7 +250,7 @@ export class Notice {
         align?: 'left' | 'center' | 'right',
         closable?: boolean,
         customClass?: string | string[],
-        onClose?: (noticeUnit: NoticeUnit) => void,
+        onClose?: (messageUnit: MessageUnit) => void,
     }) {
         const {
             message,
@@ -266,7 +266,7 @@ export class Notice {
 
         this.verifyPopParams({ duration, height, fontSize, onClose });
 
-        const noticeUnit = new NoticeUnit({
+        const messageUnit = new MessageUnit({
             content: message,
             type,
             duration,
@@ -282,31 +282,31 @@ export class Notice {
 
         let unitTop;
         if (this.units.length > 0) {
-            noticeUnit.setGap(this.gap);
+            messageUnit.setGap(this.gap);
 
             const lastUnit = this.units[this.units.length - 1]; // 上一个单元(如果有)
-            unitTop = lastUnit.top + lastUnit.height + noticeUnit.gap;
+            unitTop = lastUnit.top + lastUnit.height + messageUnit.gap;
         } else {
-            noticeUnit.setGap(this.offset);
+            messageUnit.setGap(this.offset);
 
-            unitTop = noticeUnit.gap;
+            unitTop = messageUnit.gap;
         }
 
-        this.container.appendChild(noticeUnit.html);
-        noticeUnit.setTop(unitTop, true);
+        this.container.appendChild(messageUnit.html);
+        messageUnit.setTop(unitTop, true);
 
-        this.units.push(noticeUnit);
+        this.units.push(messageUnit);
 
         // -------------------------------------------------
 
-        this.setTweenHide({ duration, noticeUnit });
+        this.setTweenHide({ duration, messageUnit });
     }
 
     private static verifyPopParams(params: {
         duration: number,
         height: number,
         fontSize: number,
-        onClose?: (noticeUnit: NoticeUnit) => void,
+        onClose?: (messageUnit: MessageUnit) => void,
     }) {
         const {
             duration,
@@ -323,10 +323,10 @@ export class Notice {
 
     private static setTweenHide(params: {
         duration: number,
-        noticeUnit: NoticeUnit,
+        messageUnit: MessageUnit,
     }) {
-        const { duration, noticeUnit } = params;
-        const slideDistance = noticeUnit.totalHeight;
+        const { duration, messageUnit } = params;
+        const slideDistance = messageUnit.totalHeight;
 
         const propsHide = { slideDistance };
         const tweenHide = new TWEEN.Tween(propsHide, group);
@@ -341,7 +341,7 @@ export class Notice {
         tweenHide
             // @ts-ignore
             .onStart(props => {
-                if (noticeUnit.onClose) noticeUnit.onClose(noticeUnit);
+                if (messageUnit.onClose) messageUnit.onClose(messageUnit);
             })
             .onUpdate(props => {
                 // 每次 onStart 触发后，至少触发一次 onUpdate，哪怕 onStart 回调里调用了 Tween.pause() 或 Tween.stop()
@@ -349,7 +349,7 @@ export class Notice {
                 const decrement = lastSlideDistance - props.slideDistance;
                 lastSlideDistance = props.slideDistance;
 
-                const i = Notice.units.findIndex(unit => unit === noticeUnit);
+                const i = Notice.units.findIndex(unit => unit === messageUnit);
                 const unitsAfter = Notice.units.slice(i);
 
                 for (const unit of unitsAfter) {
@@ -358,9 +358,9 @@ export class Notice {
             })
             // @ts-ignore
             .onComplete(props => {
-                const i = Notice.units.findIndex(unit => unit === noticeUnit);
+                const i = Notice.units.findIndex(unit => unit === messageUnit);
                 Notice.units.splice(i, 1);
-                this.container.removeChild(noticeUnit.html);
+                this.container.removeChild(messageUnit.html);
             });
 
         if (duration > 0) {
@@ -369,7 +369,7 @@ export class Notice {
             tweenHide.start();
         }
 
-        noticeUnit.tweenHide = tweenHide;
+        messageUnit.tweenHide = tweenHide;
     }
 }
 

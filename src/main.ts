@@ -1,5 +1,7 @@
 import $ from "cash-dom";
 import { Notice } from "./NoticeMessage/index";
+// @ts-ignore
+// import { Notice } from "../dist/notice-message.js";
 
 import './main.scss';
 import './scss/purple.scss';
@@ -39,49 +41,49 @@ $bar1.append($btn14);
 // function
 
 $btn00.on('click', () => {
-  Notice.pop({ message: 'Notice Message show' });
+  Notice.message({ message: 'Notice Message show' });
 });
 
 $btn01.on('click', () => {
-  Notice.pop({ message: 'Notice Message show', type: 'success' });
+  Notice.message({ message: 'Notice Message show', type: 'success' });
 });
 
 $btn02.on('click', () => {
-  Notice.pop({ message: 'Notice Message show', type: 'warning' });
+  Notice.message({ message: 'Notice Message show', type: 'warning' });
 });
 
 $btn03.on('click', () => {
-  Notice.pop({ message: 'Notice Message show', type: 'error' });
+  Notice.message({ message: 'Notice Message show', type: 'error' });
 });
 
 $btn10.on('click', () => {
   const factor = randomIntInScope(2, 5);
   const duration = factor * 1000;
   const type = randomType();
-  Notice.pop({ message: `Notice Message show ${factor} seconds`, type, duration });
+  Notice.message({ message: `Notice Message show ${factor} seconds`, type, duration });
 });
 
 $btn11.on('click', () => {
   const factor = randomIntInScope(6, 30);
   const height = factor * 8;
   const type = randomType();
-  Notice.pop({ message: `Notice Message of ${height}px show`, type, height });
+  Notice.message({ message: `Notice Message of ${height}px show`, type, height });
 });
 
 $btn12.on('click', () => {
   const factor = randomIntInScope(6, 12);
   const height = factor * 8;
   const type = randomType();
-  Notice.pop({ message: `Notice Message of ${height}px show`, type, height, duration: 0, closable: true });
+  Notice.message({ message: `Notice Message of ${height}px show`, type, height, duration: 0, closable: true });
 });
 
 $btn13.on('click', () => {
   const classNames = ['purple'];
-  Notice.pop({ message: 'Notice Purple Message show', type: 'default', customClass: classNames, duration: 3000 });
+  Notice.message({ message: 'Notice Purple Message show', type: 'default', customClass: classNames, duration: 3000 });
 });
 
 $btn14.on('click', () => {
-  Notice.pop({
+  Notice.message({
     message: 'Please click the close button', type: 'default', duration: 0, closable: true,
     onClose: (message: any) => {
       console.log('message :>> ', message);
