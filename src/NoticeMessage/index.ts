@@ -29,14 +29,19 @@ class NoticeUnit {
     /** 消息单元中需要显示的内容 */
     private content: string;
     /** 消息单元的类型，包括：默认，成功，警告，错误 */
+    // @ts-ignore
     private type: 'default' | 'success' | 'warning' | 'error';
     /** 消息单元的显示时间，毫秒。设为 0 则不会自动关闭 */
+    // @ts-ignore
     private duration: number;
     /** 消息单元的字体大小，像素 */
+    // @ts-ignore
     private fontSize: number;
     /** 消息单元居中、居左或居右显示 */
+    // @ts-ignore
     private align: 'left' | 'center' | 'right';
     /** 消息单元的关闭按钮是否显示 */
+    // @ts-ignore
     private closable: boolean;
     /** 自定义类名 */
     private customClass: string[] = [];
@@ -149,6 +154,7 @@ class NoticeUnit {
             const iconSvgDel = getHtmlElementFromStr(SVG_CLOSE_STR);
             btnDel.appendChild(iconSvgDel);
             this._html.appendChild(btnDel);
+            // @ts-ignore
             btnDel.addEventListener('click', ev => {
                 this.close();
             });
@@ -333,6 +339,7 @@ export class Notice {
         let lastSlideDistance = slideDistance;
 
         tweenHide
+            // @ts-ignore
             .onStart(props => {
                 if (noticeUnit.onClose) noticeUnit.onClose(noticeUnit);
             })
@@ -349,6 +356,7 @@ export class Notice {
                     unit.setTop(unit.top - decrement);
                 }
             })
+            // @ts-ignore
             .onComplete(props => {
                 const i = Notice.units.findIndex(unit => unit === noticeUnit);
                 Notice.units.splice(i, 1);

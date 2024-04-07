@@ -1,8 +1,19 @@
 {
   "name": "notice-message",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/notice-message.umd.cjs",
+  "module": "./dist/notice-message.js",
+  "exports": {
+    ".": {
+      "import": "./dist/notice-message.js",
+      "require": "./dist/notice-message.umd.cjs"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
