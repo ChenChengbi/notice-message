@@ -1,12 +1,13 @@
 import $ from "cash-dom";
 import { Notice } from "./NoticeMessage/index";
 
-import './main.scss'
+import './main.scss';
+import './scss/purple.scss';
 
 // ui
 
-const $bar0 = $('<div class="bar"></div>')
-const $bar1 = $('<div class="bar"></div>')
+const $bar0 = $('<div class="bar"></div>');
+const $bar1 = $('<div class="bar"></div>');
 
 $('#app').append($bar0);
 $('#app').append($bar1);
@@ -24,10 +25,14 @@ $bar0.append($btn03);
 const $btn10 = $('<button>随机时间</button>');
 const $btn11 = $('<button>随机高度</button>');
 const $btn12 = $('<button>不自动关闭</button>');
+const $btn13 = $('<button>自定义类名</button>');
+const $btn14 = $('<button>关闭事件回调</button>');
 
 $bar1.append($btn10);
 $bar1.append($btn11);
 $bar1.append($btn12);
+$bar1.append($btn13);
+$bar1.append($btn14);
 
 // -----------------------------------------------
 
@@ -68,6 +73,20 @@ $btn12.on('click', () => {
   const height = factor * 8;
   const type = randomType();
   Notice.pop({ message: `Notice Message of ${height}px show`, type, height, duration: 0, closable: true });
+});
+
+$btn13.on('click', () => {
+  const classNames = ['purple'];
+  Notice.pop({ message: 'Notice Purple Message show', type: 'default', customClass: classNames, duration: 3000 });
+});
+
+$btn14.on('click', () => {
+  Notice.pop({
+    message: 'Please click the close button', type: 'default', duration: 0, closable: true,
+    onClose: (message: any) => {
+      console.log('message :>> ', message);
+    }
+  });
 });
 
 function randomType(): 'default' | 'success' | 'warning' | 'error' {

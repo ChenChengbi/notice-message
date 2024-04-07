@@ -7,6 +7,11 @@ const UNIT_HTML_STR = `<div class="notice">
                            <div class="text"></div>
                        </div>`;
 const UNIT_BTN_CLOSE_STR = `<div class="btn-del"></div>`;
+const SVG_CLOSE_STR = `<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" version="1.1">
+                           <path d="M512 557.223994l249.203712 249.203712c12.491499 12.491499 32.730449 12.489452 45.221948-0.002047s12.493545-32.730449 0.002047-45.221948L557.223994 512l249.203712-249.203712c12.491499-12.491499 12.489452-32.730449-0.002047-45.221948s-32.730449-12.493545-45.221948-0.002047L512 466.776006 262.796288 217.572294c-12.491499-12.491499-32.729425-12.490475-45.220924 0.001023-6.246261 6.246261-9.370415 14.429641-9.370415 22.610974s3.121084 16.365736 9.367345 22.610974L466.774983 512 217.572294 761.203712c-6.246261 6.246261-9.367345 14.428617-9.367345 22.610974s3.125177 16.365736 9.370415 22.610974c12.491499 12.491499 32.729425 12.493545 45.220924 0.002047L512 557.223994z">
+                           </path>
+                       </svg>`;
+
 const DEFAULT_DURATION = 3000;
 const DEFAULT_HEIGHT = 48;
 const DEFAULT_FONT_SIZE = 16;
@@ -29,8 +34,14 @@ class NoticeUnit {
     private duration: number;
     /** 消息单元的字体大小，像素 */
     private fontSize: number;
+    /** 消息单元居中、居左或居右显示 */
+    private align: 'left' | 'center' | 'right';
     /** 消息单元的关闭按钮是否显示 */
     private closable: boolean;
+    /** 自定义类名 */
+    private customClass: string[] = [];
+    /** 关闭时的回调函数, 参数为被关闭的 NoticeUnit 实例 */
+    private _onClose?: (noticeUnit: NoticeUnit) => void;
 
     /** 消息主体框的高度 */
     private _height: number;
@@ -40,7 +51,6 @@ class NoticeUnit {
     private _top: number = 0;
     /** 提示单元之间的间隙(本单元的上部间隙，第一个单元的上部缝隙为0) */
     private _gap: number = 0;
-
     /** 上滑隐藏的计时器 */
     private _tweenHide?: TWEEN.Tween<{ slideDistance: number; }>;
 
@@ -48,6 +58,9 @@ class NoticeUnit {
     public get top() { return this._top; }
     public get height() { return this._height; }
     public get gap() { return this._gap; }
+
+    public get onClose() { return this._onClose; }
+
     /** 完整高度 = 单元高度 + 上方间隙高度 */
     public get totalHeight() {
         return this._height + this._gap;
@@ -60,23 +73,31 @@ class NoticeUnit {
         type: 'default' | 'success' | 'warning' | 'error',
         duration: number,
         fontSize: number,
+        align: 'left' | 'center' | 'right',
         closable: boolean,
         height: number,
+        customClass?: string | string[],
+        onClose?: (noticeUnit: NoticeUnit) => void,
     }) {
         const {
             content,
             type,
             duration,
             fontSize,
+            align,
             closable,
             height,
+            customClass,
+            onClose,
         } = params;
 
         this.content = content;
         this.type = type;
         this.duration = duration;
         this.fontSize = fontSize;
+        this.align = align;
         this.closable = closable;
+        this._onClose = onClose;
 
         this._height = height;
 
@@ -93,11 +114,40 @@ class NoticeUnit {
         }
 
         this._html.style.setProperty('height', `${this._height}px`);
-        this._html.style.setProperty('left', '50%');
-        this._html.style.setProperty('transform', 'translateX(-50%)');
+
+        switch (align) {
+            case 'left': {
+                this._html.style.setProperty('left', '16px');
+                break;
+            }
+            case 'center': {
+                this._html.style.setProperty('left', '50%');
+                this._html.style.setProperty('transform', 'translateX(-50%)');
+                break;
+            }
+            case 'right': {
+                this._html.style.setProperty('right', '16px');
+                break;
+            }
+            default:
+                break;
+        }
+
+        if (customClass) {
+            if (Array.isArray(customClass)) {
+                for (const className of customClass) {
+                    if (typeof className === 'string')
+                        this.addCustomClass(className);
+                }
+            } else if (typeof customClass === 'string') {
+                this.addCustomClass(customClass);
+            }
+        }
 
         if (closable) {
             const btnDel = getHtmlElementFromStr(UNIT_BTN_CLOSE_STR);
+            const iconSvgDel = getHtmlElementFromStr(SVG_CLOSE_STR);
+            btnDel.appendChild(iconSvgDel);
             this._html.appendChild(btnDel);
             btnDel.addEventListener('click', ev => {
                 this.close();
@@ -107,6 +157,7 @@ class NoticeUnit {
 
     /**
      * 设置位置
+     * @internal
      * @param v 值
      * @param isGradual 是否渐变出场
      */
@@ -115,22 +166,46 @@ class NoticeUnit {
         // this._html.dataset['top'] = String(this._top);
 
         if (isGradual) {
-            this._html.style.setProperty('top', `${this._top - this.totalHeight}px`);
-            setTimeout(() => { this._html.style.setProperty('top', `${this._top}px`); }, 0); // 用于渐变样式 transition: top 0.5s ease-out;
+            // 下面写法在 Chrome 有效，但 Firefox 中无效，故换用 Tween.js 实现
+            // this._html.style.setProperty('top', `${this._top - this.totalHeight}px`);
+            // setTimeout(() => { this._html.style.setProperty('top', `${this._top}px`); }, 0); // 用于渐变样式 transition: top 0.2s ease-out;
+
+            const top = this._top - this.totalHeight;
+            const propsShow = { top };
+            const tweenShow = new TWEEN.Tween(propsShow, group);
+
+            // 滑动后出现
+            tweenShow.to({ top: this._top }, 200);
+            tweenShow
+                .onUpdate(props => { this._html.style.setProperty('top', `${props.top}px`); })
+                .onComplete(props => { this._html.style.setProperty('top', `${props.top}px`); });
+            tweenShow.start();
+
         } else {
             this._html.style.setProperty('top', `${this._top}px`);
         }
     }
 
+    /** 
+     * 设置提示单元之间的间隙
+     * @internal
+     */
     public setGap(v: number) {
         this._gap = v;
     }
 
+    /** 关闭提示单元 */
     public close() {
         if (this._tweenHide) {
             this._tweenHide.delay(0);
             this._tweenHide.start();
         }
+    }
+
+    /** 添加一个自定义类名 */
+    private addCustomClass(className: string) {
+        this._html.classList.add(className);
+        this.customClass.push(className);
     }
 }
 
@@ -141,9 +216,9 @@ export class Notice {
     private static readonly gap: number = 16;
     /** 消息单元滑动消失的时间 */
     private static readonly slideTime: number = 300;
-
+    /** 存放提示单元集合 */
     private static readonly units: NoticeUnit[] = [];
-
+    /** 提示集的容器 */
     private static container: HTMLElement = document.body;
 
     public static setContainer(container: HTMLElement) {
@@ -158,6 +233,7 @@ export class Notice {
      * @param params.height 消息主体框的高度，像素。默认为 48
      * @param params.fontSize 消息的字体大小，像素。默认为 16
      * @param params.closable 消息的关闭按钮是否显示。默认为 false
+     * @param params.customClass 消息的自定义类名
      */
     public static pop(params: {
         message: string,
@@ -165,7 +241,10 @@ export class Notice {
         duration?: number,
         height?: number,
         fontSize?: number,
+        align?: 'left' | 'center' | 'right',
         closable?: boolean,
+        customClass?: string | string[],
+        onClose?: (noticeUnit: NoticeUnit) => void,
     }) {
         const {
             message,
@@ -173,18 +252,24 @@ export class Notice {
             duration = DEFAULT_DURATION,
             height = DEFAULT_HEIGHT,
             fontSize = DEFAULT_FONT_SIZE,
+            align = 'center',
             closable = false,
+            customClass,
+            onClose,
         } = params;
 
-        this.verifyPopParams({ duration, height, fontSize });
+        this.verifyPopParams({ duration, height, fontSize, onClose });
 
         const noticeUnit = new NoticeUnit({
             content: message,
             type,
             duration,
             fontSize,
+            align,
             closable,
             height,
+            customClass,
+            onClose,
         });
 
         // -------------------------------------------------
@@ -215,16 +300,19 @@ export class Notice {
         duration: number,
         height: number,
         fontSize: number,
+        onClose?: (noticeUnit: NoticeUnit) => void,
     }) {
         const {
             duration,
             height,
             fontSize,
+            onClose,
         } = params;
 
-        if (duration < 0) throw new Error(`duration 不可小于0`);
-        if (height < 1) throw new Error(`height 不可小于1`);
-        if (fontSize < 12) throw new Error(`fontSize 不可小于12`);
+        if (duration < 0) throw new Error(`duration 不可小于 0`);
+        if (height < 1) throw new Error(`height 不可小于 1`);
+        if (fontSize < 12) throw new Error(`fontSize 不可小于 12`);
+        if (onClose && typeof onClose !== 'function') throw new Error(`onClose 必须为函数`);
     }
 
     private static setTweenHide(params: {
@@ -237,8 +325,6 @@ export class Notice {
         const propsHide = { slideDistance };
         const tweenHide = new TWEEN.Tween(propsHide, group);
 
-        tweenHide.delay(duration);
-
         // 滑动后消失
         tweenHide.to({
             slideDistance: 0
@@ -247,8 +333,12 @@ export class Notice {
         let lastSlideDistance = slideDistance;
 
         tweenHide
-            .onStart(props => { })
+            .onStart(props => {
+                if (noticeUnit.onClose) noticeUnit.onClose(noticeUnit);
+            })
             .onUpdate(props => {
+                // 每次 onStart 触发后，至少触发一次 onUpdate，哪怕 onStart 回调里调用了 Tween.pause() 或 Tween.stop()
+
                 const decrement = lastSlideDistance - props.slideDistance;
                 lastSlideDistance = props.slideDistance;
 
@@ -258,14 +348,18 @@ export class Notice {
                 for (const unit of unitsAfter) {
                     unit.setTop(unit.top - decrement);
                 }
-            }).onComplete(props => {
+            })
+            .onComplete(props => {
                 const i = Notice.units.findIndex(unit => unit === noticeUnit);
                 Notice.units.splice(i, 1);
                 this.container.removeChild(noticeUnit.html);
             });
 
-        // if (duration > 3000) tweenHide.start(); // 测试用
-        if (duration > 0) tweenHide.start();
+        if (duration > 0) {
+            tweenHide.delay(duration);
+            // if (duration > 3000) tweenHide.start(); // 测试用
+            tweenHide.start();
+        }
 
         noticeUnit.tweenHide = tweenHide;
     }
