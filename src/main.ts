@@ -1,7 +1,5 @@
 import $ from "cash-dom";
 import { Notice } from "./NoticeMessage/index";
-// @ts-ignore
-// import { Notice } from "../dist/notice-message.js";
 
 import './main.scss';
 import './scss/purple.scss';

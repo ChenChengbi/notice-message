@@ -4,6 +4,8 @@ import {
 import {
     defineConfig
 } from 'vite'
+import dts from 'vite-plugin-dts'
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 
 export default defineConfig({
     build: {
@@ -12,7 +14,8 @@ export default defineConfig({
             entry: resolve(__dirname, 'lib/main.js'),
             name: 'Notice',
             // the proper extensions will be added
-            fileName: 'notice-message',
+            // fileName: 'notice-message', // 默认 fileName 是 package.json 的 name 选项
+            formats: ['es', 'umd', 'iife'],
         },
         rollupOptions: {
             // 确保外部化处理那些你不想打包进库的依赖
@@ -24,5 +27,11 @@ export default defineConfig({
             //     },
             // },
         },
+        copyPublicDir: false,
     },
+    plugins: [
+        dts({ include: ['src/NoticeMessage'] }),
+        // Look at this: https://github.com/vitejs/vite/issues/1579
+        cssInjectedByJsPlugin(),
+    ],
 })
