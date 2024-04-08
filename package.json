@@ -7,7 +7,7 @@
   "author": "Billy Chen",
   "license": "MIT",
   "homepage": "https://gitee.com/bi2008/notice-message",
-  "repository": "https://gitee.com/bi2008/notice-message",
+  "repository": "https://github.com/ChenChengbi/notice-message",
   "type": "module",
   "files": ["dist"],
   "main": "./dist/notice-message.umd.cjs",

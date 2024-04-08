@@ -2,6 +2,9 @@
 
 > 系统消息的通知/提醒的组件
 
+## 🌰 示例
+https://chenchengbi.github.io/notice-message/
+
 ## 📦 安装
 ``` bash
 $ npm i notice-message
