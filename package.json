@@ -1,11 +1,18 @@
 {
   "name": "notice-message",
   "private": false,
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "系统消息的通知/提醒的组件",
+  "keywords": ["notice", "message", "notification", "pop", "pop-up"],
+  "author": "Billy Chen",
+  "license": "MIT",
+  "homepage": "https://gitee.com/bi2008/notice-message",
+  "repository": "https://gitee.com/bi2008/notice-message",
   "type": "module",
   "files": ["dist"],
   "main": "./dist/notice-message.umd.cjs",
   "module": "./dist/notice-message.js",
+  "unpkg": "./dist/notice-message.iife.js",
   "exports": {
     ".": {
       "import": "./dist/notice-message.js",
@@ -15,8 +22,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "tsc && vite build"
   },
   "devDependencies": {
     "sass": "^1.72.0",

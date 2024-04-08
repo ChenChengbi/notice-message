@@ -202,6 +202,10 @@ class MessageUnit {
     /** 关闭提示单元 */
     public close() {
         if (this._tweenHide) {
+            if (this._tweenHide.isPlaying()) {
+                this._tweenHide.stop();
+            }
+
             this._tweenHide.delay(0);
             this._tweenHide.start();
         }
@@ -232,13 +236,15 @@ export class Notice {
 
     /**
      * 弹出一条消息
-     * @param params.message 消息单元中需要显示的文字内容 
+     * @param params.message 需要显示的消息文字内容 
      * @param params.type 消息的类型，包括：默认，成功，警告，错误
      * @param params.duration 消息的显示时间，毫秒。设为 0 则不会自动关闭。默认为 3000
-     * @param params.height 消息主体框的高度，像素。默认为 48
+     * @param params.height 消息框的高度尺寸，像素。默认为 48
      * @param params.fontSize 消息的字体大小，像素。默认为 16
+     * @param params.align 消息的位置是居中还是靠左或靠右，默认为居中即 'center'
      * @param params.closable 消息的关闭按钮是否显示。默认为 false
      * @param params.customClass 消息的自定义类名
+     * @param params.onClose 消息关闭时的回调函数
      */
     public static message(params: {
         message: string,

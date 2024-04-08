@@ -26,7 +26,7 @@ const $btn10 = $('<button>随机时间</button>');
 const $btn11 = $('<button>随机高度</button>');
 const $btn12 = $('<button>不自动关闭</button>');
 const $btn13 = $('<button>自定义类名</button>');
-const $btn14 = $('<button>关闭事件回调</button>');
+const $btn14 = $('<button>可关闭</button>');
 
 $bar1.append($btn10);
 $bar1.append($btn11);
@@ -82,9 +82,14 @@ $btn13.on('click', () => {
 
 $btn14.on('click', () => {
   Notice.message({
-    message: 'Please click the close button', type: 'default', duration: 0, closable: true,
-    onClose: (message: any) => {
-      console.log('message :>> ', message);
+    message: `Click the close button to close me immediately, otherwise I will close automatically after 5 seconds.`,
+    type: 'default',
+    duration: 5000,
+    height: 64,
+    closable: true,
+    // @ts-ignore
+    onClose: (message) => {
+      // console.log('message :>> ', message);
     }
   });
 });
