@@ -22,7 +22,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build:lib": "tsc && vite build --mode lib",
+    "build:docs": "tsc && vite build --mode docs"
   },
   "devDependencies": {
     "sass": "^1.72.0",
