@@ -1,7 +1,7 @@
 {
   "name": "notice-message",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "系统消息的通知/提醒的组件",
   "keywords": ["notice", "message", "notification", "pop", "pop-up"],
   "author": "Billy Chen",

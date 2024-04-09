@@ -226,19 +226,25 @@ export class Notice {
     /** 消息单元滑动消失的时间 */
     private static readonly slideTime: number = 300;
     /** 存放提示单元集合 */
-    private static readonly units: MessageUnit[] = [];
+    private static readonly unitsMap: Map<HTMLElement, MessageUnit[]> = new Map();
+    /** 默认的提示集的容器 */
+    private static readonly defaultContainer = window.document.body;
     /** 提示集的容器 */
-    private static container: HTMLElement = document.body;
+    private static container: HTMLElement = this.defaultContainer;
 
-    public static setContainer(container: HTMLElement) {
-        this.container = container;
-    }
+    private static getUnits(container: HTMLElement): MessageUnit[] {
+        if (!this.unitsMap.has(container)) {
+            this.unitsMap.set(container, []);
+        }
+        return this.unitsMap.get(container)!;
+    };
 
     /**
      * 弹出一条消息
      * @param params.message 需要显示的消息文字内容 
      * @param params.type 消息的类型，包括：默认，成功，警告，错误
      * @param params.duration 消息的显示时间，毫秒。设为 0 则不会自动关闭。默认为 3000
+     * @param params.container 提示嵌入在哪个容器。默认为 window.document.body。若指定 body 以外的容器，请自行设置容器的样式 position 为 relative/absolute/fixed 并且设置 overflow 为 hidden/auto
      * @param params.height 消息框的高度尺寸，像素。默认为 48
      * @param params.fontSize 消息的字体大小，像素。默认为 16
      * @param params.align 消息的位置是居中还是靠左或靠右，默认为居中即 'center'
@@ -250,6 +256,7 @@ export class Notice {
         message: string,
         type?: 'default' | 'success' | 'warning' | 'error',
         duration?: number,
+        container?: HTMLElement,
         height?: number,
         fontSize?: number,
         align?: 'left' | 'center' | 'right',
@@ -261,6 +268,7 @@ export class Notice {
             message,
             type = 'default',
             duration = DEFAULT_DURATION,
+            container = this.defaultContainer,
             height = DEFAULT_HEIGHT,
             fontSize = DEFAULT_FONT_SIZE,
             align = 'center',
@@ -270,6 +278,8 @@ export class Notice {
         } = params;
 
         this.verifyPopParams({ duration, height, fontSize, onClose });
+
+        this.container = container;
 
         const messageUnit = new MessageUnit({
             content: message,
@@ -285,11 +295,13 @@ export class Notice {
 
         // -------------------------------------------------
 
+        const currUnits = this.getUnits(container);
+
         let unitTop;
-        if (this.units.length > 0) {
+        if (currUnits.length > 0) {
             messageUnit.setGap(this.gap);
 
-            const lastUnit = this.units[this.units.length - 1]; // 上一个单元(如果有)
+            const lastUnit = currUnits[currUnits.length - 1]; // 上一个单元(如果有)
             unitTop = lastUnit.top + lastUnit.height + messageUnit.gap;
         } else {
             messageUnit.setGap(this.offset);
@@ -300,11 +312,11 @@ export class Notice {
         this.container.appendChild(messageUnit.html);
         messageUnit.setTop(unitTop, true);
 
-        this.units.push(messageUnit);
+        currUnits.push(messageUnit);
 
         // -------------------------------------------------
 
-        this.setTweenHide({ duration, messageUnit });
+        this.setTweenHide({ duration, messageUnit, container });
     }
 
     private static verifyPopParams(params: {
@@ -329,8 +341,9 @@ export class Notice {
     private static setTweenHide(params: {
         duration: number,
         messageUnit: MessageUnit,
+        container: HTMLElement,
     }) {
-        const { duration, messageUnit } = params;
+        const { duration, messageUnit, container } = params;
         const slideDistance = messageUnit.totalHeight;
 
         const propsHide = { slideDistance };
@@ -343,6 +356,8 @@ export class Notice {
 
         let lastSlideDistance = slideDistance;
 
+        const currUnits = this.getUnits(container);
+
         tweenHide
             // @ts-ignore
             .onStart(props => {
@@ -354,8 +369,8 @@ export class Notice {
                 const decrement = lastSlideDistance - props.slideDistance;
                 lastSlideDistance = props.slideDistance;
 
-                const i = Notice.units.findIndex(unit => unit === messageUnit);
-                const unitsAfter = Notice.units.slice(i);
+                const i = currUnits.findIndex(unit => unit === messageUnit);
+                const unitsAfter = currUnits.slice(i);
 
                 for (const unit of unitsAfter) {
                     unit.setTop(unit.top - decrement);
@@ -363,9 +378,9 @@ export class Notice {
             })
             // @ts-ignore
             .onComplete(props => {
-                const i = Notice.units.findIndex(unit => unit === messageUnit);
-                Notice.units.splice(i, 1);
-                this.container.removeChild(messageUnit.html);
+                const i = currUnits.findIndex(unit => unit === messageUnit);
+                currUnits.splice(i, 1);
+                container.removeChild(messageUnit.html);
             });
 
         if (duration > 0) {

@@ -36,6 +36,19 @@ $bar1.append($btn14);
 
 // -----------------------------------------------
 
+const $area0 = $('<div class="area"></div>');
+$area0.css('position', 'relative').css('overflow', 'auto');
+$('#app').append($area0);
+
+const $area_btn00 = $('<button>指定区域</button>');
+$area0.append($area_btn00);
+
+$area_btn00.on('click', () => {
+  Notice.message({ message: 'Notice Message show', duration: 1000, container: $area0[0] as HTMLElement });
+});
+
+// -----------------------------------------------
+
 // function
 
 $btn00.on('click', () => {
